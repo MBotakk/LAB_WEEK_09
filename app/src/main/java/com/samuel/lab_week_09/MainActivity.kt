@@ -9,10 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
@@ -26,6 +24,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.samuel.lab_week_09.ui.theme.LAB_WEEK_09Theme
+import com.samuel.lab_week_09.ui.theme.OnBackgroundItemText
+import com.samuel.lab_week_09.ui.theme.OnBackgroundTitleText
+import com.samuel.lab_week_09.ui.theme.PrimaryTextButton
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,15 +49,6 @@ data class Student(var name: String)
 
 @Composable
 fun Home() {
-    //Here, we create a mutable state list of Student
-    //We use remember to make the list remember its value
-    //This is so that the list won’t be recreated when the composable
-    //recomposes
-    //We use mutableStateListOf to make the list mutable
-    //This is so that we can add or remove items from the List
-    //If you’re still confused, this is basically the same concept as
-    //using
-    //useState in React
     val listData = remember {
         mutableStateListOf(
             Student("Tanu"),
@@ -64,16 +56,8 @@ fun Home() {
             Student("Tono")
         )
     }
-    //Here, we create a mutable state of Student
-    //This is so that we can get the value of the input field
     val inputField = remember { mutableStateOf(Student("")) }
 
-    //We call the HomeContent composable
-    //Here, we pass:
-    //listData to show the list of items inside HomeContent
-    //inputField to show the input field value inside HomeContent
-    //A lambda function to update the value of the inputField
-    //A lambda function to add the inputField to the listData
     HomeContent(
         listData = listData,
         inputField = inputField.value,
@@ -100,7 +84,7 @@ fun HomeContent(
                 modifier = Modifier.padding(16.dp).fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = stringResource(id = R.string.enter_item))
+                OnBackgroundTitleText(text = stringResource(id = R.string.enter_item))
                 TextField(
                     value = inputField.name,
                     onValueChange = onInputValueChange,
@@ -108,8 +92,8 @@ fun HomeContent(
                         keyboardType = KeyboardType.Text
                     )
                 )
-                Button(onClick = onButtonClick) {
-                    Text(text = stringResource(id = R.string.button_click))
+                PrimaryTextButton(text = stringResource(id = R.string.button_click)) {
+                    onButtonClick()
                 }
             }
         }
@@ -118,7 +102,7 @@ fun HomeContent(
                 modifier = Modifier.padding(vertical = 4.dp).fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = item.name)
+                OnBackgroundItemText(text = item.name)
             }
         }
     }
