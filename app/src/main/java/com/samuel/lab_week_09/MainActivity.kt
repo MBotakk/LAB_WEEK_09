@@ -34,6 +34,9 @@ import com.samuel.lab_week_09.ui.theme.LAB_WEEK_09Theme
 import com.samuel.lab_week_09.ui.theme.OnBackgroundItemText
 import com.samuel.lab_week_09.ui.theme.OnBackgroundTitleText
 import com.samuel.lab_week_09.ui.theme.PrimaryTextButton
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,7 +73,7 @@ fun App(navController: NavHostController) {
     }
 }
 
-data class Student(var name: String)
+data class Student(val name: String)
 
 @Composable
 fun Home(navigateFromHomeToResult: (String) -> Unit) {
@@ -83,6 +86,10 @@ fun Home(navigateFromHomeToResult: (String) -> Unit) {
     }
     val inputField = remember { mutableStateOf(Student("")) }
 
+    val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+    val listType = Types.newParameterizedType(List::class.java, Student::class.java)
+    val jsonAdapter = moshi.adapter<List<Student>>(listType)
+
     HomeContent(
         listData = listData,
         inputField = inputField.value,
@@ -93,7 +100,10 @@ fun Home(navigateFromHomeToResult: (String) -> Unit) {
                 inputField.value = Student("")
             }
         },
-        navigateFromHomeToResult = { navigateFromHomeToResult(listData.toList().toString()) }
+        navigateFromHomeToResult = { 
+            val json = jsonAdapter.toJson(listData.toList())
+            navigateFromHomeToResult(json) 
+        }
     )
 }
 
@@ -148,13 +158,26 @@ fun HomeContent(
 
 @Composable
 fun ResultContent(listData: String) {
-    Column(
+    val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+    val listType = Types.newParameterizedType(List::class.java, Student::class.java)
+    val jsonAdapter = moshi.adapter<List<Student>>(listType)
+    val studentList = if(listData.isNotEmpty()) jsonAdapter.fromJson(listData) else emptyList()
+
+    LazyColumn(
         modifier = Modifier
             .padding(vertical = 4.dp)
             .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        OnBackgroundItemText(text = listData)
+        items(studentList ?: emptyList()) { item ->
+             Column(
+                modifier = Modifier
+                    .padding(vertical = 4.dp)
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                OnBackgroundItemText(text = item.name)
+            }
+        }
     }
 }
 
